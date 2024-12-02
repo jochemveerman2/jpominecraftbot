@@ -1,1 +1,1 @@
-# jpominecraftbot
+# JPO-Minecraft bot
