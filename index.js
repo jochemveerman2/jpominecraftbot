@@ -107,7 +107,7 @@ if (msg.includes("-> you] balance")) {
       if (user) {
         const totalAmount = user.geo;
 
-        bot.chat(`/msg ${sender} ${nameToCheck}, heeft ${totalAmount} Geo op zijn/haar JPO account staan.`);
+        bot.chat(`/msg ${sender} ${nameToCheck} heeft ${totalAmount} Geo op zijn/haar JPO account staan.`);
       } else {
         bot.chat(`/msg ${sender} Geen gebruiker op de JPO website gevonden met de naam ${nameToCheck}.`);
       }
@@ -184,52 +184,61 @@ if (msg.includes("-> you] balance")) {
       }
     }
 
-	if (msg.startsWith("[XConomy]") && msg.includes("You receive") && msg.includes("Geo from")) {
-  		const geoMatch = msg.match(/You receive (\d+\.\d+) Geo from ([^\s]+)/);
+if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you receive") && msg.toLowerCase().includes("geo from")) {
+  	const geoMatch = msg.match(/You receive ([\d,.]+) Geo from ([^\s]+)/i);
 
-      if (geoMatch) {
-        const geoAmount = parseFloat(geoMatch[1]);
-        const sender = geoMatch[2];
+  	if (geoMatch) {
+    	let geoAmountStr = geoMatch[1];
+    	
+    	geoAmountStr = geoAmountStr.replace(/\.(?=\d{3}\.)/g, ''); 
 
-        console.log(`Betaling ontvangen van ${sender}: ${geoAmount} Geo`);
+    	geoAmountStr = geoAmountStr.replace(/\.(?=\d{2}$)/, ',');
 
-        fs.readFile('../../gebruikers.json', 'utf8', (err, data) => {
-          if (err) {
-            console.log('Fout bij het lezen van gebruikers.json:', err);
-            return;
-          }
+    	const geoAmount = parseFloat(geoAmountStr);
 
-          let gebruikers = [];
-          try {
-            gebruikers = JSON.parse(data);
-          } catch (parseError) {
-            console.log('Fout bij het parsen van gebruikers.json:', parseError);
-            return;
-          }
+    	const sender = geoMatch[2];
 
-          const userIndex = gebruikers.findIndex(user => user.name === sender);
+    	console.log(`Betaling ontvangen van ${sender}: ${geoAmount} Geo`);
 
-          if (userIndex !== -1) {
-            gebruikers[userIndex].geo += geoAmount;
-            const totaalGeo = gebruikers[userIndex].geo;
+    	fs.readFile('../../gebruikers.json', 'utf8', (err, data) => {
+      	if (err) {
+        	console.log('Fout bij het lezen van gebruikers.json:', err);
+        	return;
+      	}
 
-            fs.writeFile('../../gebruikers.json', JSON.stringify(gebruikers, null, 2), (err) => {
-              if (err) {
-                console.log('Fout bij het opslaan van gebruikers.json:', err);
-              } else {
-                console.log(`${geoAmount} Geo toegevoegd aan ${sender}. Nieuw totaal: ${totaalGeo} Geo.`);
-                bot.chat(`/msg ${sender} ${sender}, u heeft ${geoAmount} gestort op uw JPO account, u heeft nu ${totaalGeo} Geo op uw JPO account.`);
-              }
-            });
-          } else {
-            console.log(`Gebruiker ${sender} niet gevonden, Geo wordt teruggestort.`);
+      	let gebruikers = [];
+      	try {
+        	gebruikers = JSON.parse(data);
+      	} catch (parseError) {
+        	console.log('Fout bij het parsen van gebruikers.json:', parseError);
+        	return;
+      	}
 
-            bot.chat(`/pay ${sender} ${geoAmount}`);
-            bot.chat(`/msg ${sender} ${sender}, Geo teruggestort, geen account herkend op de JPO website.`);
-          }
-        });
-      }
-    }
+      	const userIndex = gebruikers.findIndex(user => user.name.toLowerCase() === sender.toLowerCase());
+
+      	if (userIndex !== -1) {
+        	gebruikers[userIndex].geo += geoAmount;
+        	const totaalGeo = gebruikers[userIndex].geo;
+
+        	const geoTotaalFormatted = (totaalGeo % 1 === 0) ? totaalGeo.toFixed(0) : totaalGeo.toFixed(2);
+
+        	fs.writeFile('../../gebruikers.json', JSON.stringify(gebruikers, null, 2), (err) => {
+          	if (err) {
+            	console.log('Fout bij het opslaan van gebruikers.json:', err);
+          	} else {
+            	console.log(`${geoAmount} Geo toegevoegd aan ${sender}. Nieuw totaal: ${geoTotaalFormatted} Geo.`);
+            	bot.chat(`/msg ${sender} ${sender}, u heeft ${geoAmount} gestort op uw JPO account, u heeft nu ${geoTotaalFormatted} Geo op uw JPO account.`);
+          	}
+        	});
+      	} else {
+        	console.log(`Gebruiker ${sender} niet gevonden, Geo wordt teruggestort.`);
+
+        	bot.chat(`/pay ${sender} ${geoAmount}`);
+        	bot.chat(`/msg ${sender} ${sender}, Geo teruggestort, geen account herkend op de JPO website.`);
+      	}
+    	});
+  	   }
+     }
   });
 }
 
