@@ -71,103 +71,6 @@ function createBot() {
       }
     }
 
-if (msg.includes("-> you] discord")) {
-  const discordMatch = msg.match(/\[([^\]]+)\s->\syou\] discord/);
-
-  if (discordMatch) {
-    const minecraftName = discordMatch[1];
-
-    fs.readFile('../../gebruikers.json', 'utf8', (err, data) => {
-      if (err) {
-        return;
-      }
-
-      let gebruikers = [];
-      try {
-        gebruikers = JSON.parse(data);
-      } catch (parseError) {
-        console.log(`Error parsing gebruikers.json: ${parseError}`);
-        return;
-      }
-
-      const user = gebruikers.find(user => user.name.toLowerCase() === minecraftName.toLowerCase());
-
-      if (!user) {
-        bot.chat(`/msg ${minecraftName} ${minecraftName}, geen account herkend op de JPO website.`);
-        return;
-      }
-
-      if (user.discordid) {
-        bot.chat(`/msg ${minecraftName} ${minecraftName}, u heeft al uw discord account gekoppeld.`);
-        return;
-      }
-
-      const token = Math.floor(100000 + Math.random() * 900000).toString();
-
-      const discordData = {
-        name: minecraftName,
-        token: token,
-        verified: false
-      };
-
-      fs.readFile('discord.json', 'utf8', (err, discordDataFile) => {
-        if (err) {
-          return;
-        }
-
-        let discordUsers = [];
-        try {
-          discordUsers = JSON.parse(discordDataFile);
-        } catch (parseError) {
-          return;
-        }
-
-        discordUsers.push(discordData);
-
-        fs.writeFile('discord.json', JSON.stringify(discordUsers, null, 2), (err) => {
-          if (err) {
-          } else {
-            bot.chat(`/msg ${minecraftName} ${minecraftName}, voer het volgende commando uit op de JPO discord bot: /verify ${token}`);
-          }
-        });
-      });
-    });
-  }
-}
-
-setInterval(() => {
-  fs.readFile('discord.json', 'utf8', (err, discordDataFile) => {
-    if (err) {
-      return;
-    }
-
-    let discordUsers = [];
-    try {
-      discordUsers = JSON.parse(discordDataFile);
-    } catch (parseError) {
-      return;
-    }
-
-    discordUsers.forEach((user, index) => {
-      if (user.verified) {
-        bot.chat(`/msg ${user.name} ${user.name}, succesvol discord account gekoppeld.`);
-        
-        discordUsers.splice(index, 1);
-
-        fs.writeFile('discord.json', JSON.stringify(discordUsers, null, 2), (err) => {
-          if (err) {
-          } else {
-          }
-        });
-      }
-    });
-  });
-}, 5000);
-
-
-
-    
-
 if (msg.includes("-> you] deposit")) {
   const depositMatch = msg.match(/\[([^\]]+)\s->\syou\] deposit (\d+(\.\d+)?)/);
   if (depositMatch) {
@@ -281,8 +184,8 @@ if (msg.includes("-> you] balance")) {
       }
     }
 
-    if (msg.includes("You receive") && msg.includes("Geo from")) {
-      const geoMatch = msg.match(/You receive (\d+\.\d+) Geo from ([^\s]+)/);
+	if (msg.startsWith("[XConomy]") && msg.includes("You receive") && msg.includes("Geo from")) {
+  		const geoMatch = msg.match(/You receive (\d+\.\d+) Geo from ([^\s]+)/);
 
       if (geoMatch) {
         const geoAmount = parseFloat(geoMatch[1]);
