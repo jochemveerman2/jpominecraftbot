@@ -10,7 +10,6 @@ function createBot() {
   });
 
   bot.on('spawn', () => {
-    console.log('Bot is verbonden met de server!');
   });
 
   bot.on('error', (err) => {
@@ -18,8 +17,9 @@ function createBot() {
   });
 
   bot.on('end', () => {
-    console.log('Bot is gedisconnect van de server.');
+    setTimeout(createBot, 1000);
   });
+
 
   bot.on("message", (message) => {
     const msg = message.toString();
