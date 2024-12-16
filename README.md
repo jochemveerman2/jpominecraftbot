@@ -1,33 +1,30 @@
 # JPO Minecraft Bot
 
-Dit is een **JPO Minecraft bot** die verbinding maakt met de Minecraft server van **geocraft.nl** en automatisch verschillende functies uitvoert op basis van chatberichten. De bot maakt gebruik van de `mineflayer` bibliotheek en is geschreven in **Node.js**.
+Dit is een Minecraft-bot die helpt met dingen doen op de server **geocraft.nl**! De bot is een soort robot die in het spel speelt en helpt bij dingen zoals teleporteren, geld beheren, en meer. Het is alsof je een vriend hebt die automatisch bepaalde dingen in Minecraft voor je doet!
 
-## Functies
+## Wat doet de bot?
 
-De bot biedt verschillende functionaliteiten om te interageren met de server en gebruikersaccounts. De belangrijkste functionaliteiten zijn:
+De bot kan veel verschillende dingen doen, zoals:
 
-- **Teleportatie-aanvragen**: De bot accepteert teleportatie-aanvragen van andere spelers.
-- **Opname en Storting**: De bot verwerkt opname- en stortingsverzoeken van gebruikers met behulp van hun `geo` saldo.
-- **Saldo-informatie**: De bot kan het saldo van gebruikers opvragen en weergeven.
-- **Inlogverwerking**: De bot verwerkt inlogverzoeken op basis van een token en logt succesvolle inlogpogingen.
-- **Betalingen**: De bot verwerkt Geo-betalingen van andere spelers en voegt het saldo van gebruikers aan.
+- **Teleporteren**: Als iemand vraagt om geteleporteerd te worden naar de bot, accepteert de bot dat automatisch.
+- **Geld opnemen of storten**: De bot kan je helpen om geld uit je Minecraft-account te halen of erin te stoppen. Dit geld heet "Geo".
+- **Balance checken**: Als iemand wil weten hoeveel geld ze op hun account hebben, kan de bot dat vertellen!
+- **Inloggen**: De bot kan spelers helpen om in te loggen met een speciale code.
+- **Betalingen ontvangen**: Als iemand geld naar je stuurt in Minecraft, kan de bot dat zien en ervoor zorgen dat je het krijgt!
 
-## Installatie
+## Hoe werkt de bot?
 
-Volg deze stappen om de bot op je systeem te draaien:
+De bot kijkt naar berichten in de chat van Minecraft. Als iemand een bericht stuurt zoals **"wants teleport to you!"**, dan weet de bot dat hij de teleportatie moet accepteren. Als iemand zegt **"withdraw"**, dan helpt de bot die persoon met het opnemen van hun geld.
 
-### 1. Vereisten
+Als de bot iets niet begrijpt of als er een probleem is, zoals niet genoeg geld op het account, zal hij dat ook zeggen in de chat!
 
-- **Node.js** (minimaal versie 14)
-- **npm** (Node Package Manager)
-- **Mijnflayer bibliotheek** voor Minecraft bots
+## Waar gebruikt de bot de gegevens voor?
 
-### 2. Installatie van de afhankelijkheden
+De bot kijkt in een bestand (dat is een soort opslagsysteem voor computers) om te zien hoeveel geld mensen hebben of om te weten wie er probeert in te loggen. Dit bestand is nodig zodat de bot weet wie iedereen is en wat ze moeten doen.
 
-1. Zorg ervoor dat Node.js is geïnstalleerd op je systeem. Je kunt de installatiehandleiding volgen op de officiële Node.js website: https://nodejs.org
-2. Download of kloon dit project naar je lokale machine.
-3. Navigeer naar de map van het project in je terminal.
-4. Installeer de benodigde afhankelijkheden door het volgende commando uit te voeren:
+## Waarom is dit handig?
 
-   ```bash
-   npm install mineflayer
+De bot helpt de server door automatisch dingen te doen die anders door een speler gedaan zouden moeten worden. Dit maakt het spel makkelijker en leuker voor iedereen, omdat je niet alles zelf hoeft te doen!
+
+Als je ooit iets nodig hebt in Minecraft, zoals teleporteren, geld opnemen of gewoon je saldo controleren, dan is de bot daar om je te helpen!
+
