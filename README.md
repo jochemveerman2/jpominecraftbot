@@ -1,6 +1,6 @@
 # JPO Minecraft Bot
 
----
+--
 
 Dit is een Minecraft-bot die helpt met dingen doen op de server **geocraft.nl**! De bot is een soort robot die in het spel speelt en helpt bij dingen zoals teleporteren, geld beheren, en meer. Het is alsof je een vriend hebt die automatisch bepaalde dingen in Minecraft voor je doet!
 
