@@ -9,6 +9,7 @@ function createBot() {
     auth: "microsoft",
   	keepAlive: true,
   	checkTimeoutInterval: 60000,
+	version: '1.17.1'  
   });
 
   bot.on('spawn', () => {
@@ -21,7 +22,6 @@ function createBot() {
   bot.on('end', () => {
     setTimeout(createBot, 1000);
   });
-
 
   bot.on("message", (message) => {
     const msg = message.toString();
