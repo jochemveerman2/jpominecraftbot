@@ -7,9 +7,9 @@ function createBot() {
     port: 25565,
     username: "_JPO_",
     auth: "microsoft",
-  	keepAlive: true,
-  	checkTimeoutInterval: 60000,
-	version: '1.17.1'  
+    keepAlive: true,
+    checkTimeoutInterval: 60000,
+    version: '1.17.1'  
   });
 
   bot.on('spawn', () => {
