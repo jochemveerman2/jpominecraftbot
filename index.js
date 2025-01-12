@@ -3,8 +3,7 @@ const fs = require('fs');
 const express = require('express');
 
 let botStatus = {
-  online: false,
-  server: null,
+  online: false
 };
 
 const app = express();
@@ -30,8 +29,7 @@ function createBot() {
 
   bot.on('spawn', () => {
     botStatus = {
-      online: true,
-      server: bot.host
+      online: true
     };
   });
 
@@ -41,8 +39,7 @@ function createBot() {
 
   bot.on('end', () => {
     botStatus = {
-      online: false,
-      server: null
+      online: false
     };
     setTimeout(createBot, 1000);
   });
