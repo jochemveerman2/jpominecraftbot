@@ -1,5 +1,21 @@
 const mineflayer = require('mineflayer');
 const fs = require('fs');
+const express = require('express');
+
+let botStatus = {
+  online: false,
+  server: null,
+};
+
+const app = express();
+const port = 3001;
+
+app.get('/status', (req, res) => {
+  res.json(botStatus);
+});
+
+app.listen(port, () => {
+});
 
 function createBot() {
   const bot = mineflayer.createBot({
@@ -13,6 +29,10 @@ function createBot() {
   });
 
   bot.on('spawn', () => {
+    botStatus = {
+      online: true,
+      server: bot.host
+    };
   });
 
   bot.on('error', (err) => {
@@ -20,6 +40,10 @@ function createBot() {
   });
 
   bot.on('end', () => {
+    botStatus = {
+      online: false,
+      server: null
+    };
     setTimeout(createBot, 1000);
   });
 
