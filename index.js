@@ -51,48 +51,71 @@ function createBot() {
     if (msg.includes("wants teleport to you!")) {
       bot.chat("/tpaccept");
     }
+    
+if (msg.includes("-> you] website")) {
+  const senderMatch = msg.match(/\[([^\]]+)\s->\syou\] website/);
+  
+  if (senderMatch) {
+    const sender = senderMatch[1];
+    
+    bot.chat(`/msg ${sender} U kunt onze website bezoeken op jpo-geocraft.nl.`);
+  }
+}
+    
+if (msg.includes("-> you] info")) {
+  const senderMatch = msg.match(/\[([^\]]+)\s->\syou\] info/);
+  
+  if (senderMatch) {
+    const sender = senderMatch[1];
+    
+    bot.chat(`/msg ${sender} U kunt meer informatie over JPO vinden op jpo-geocraft.nl/over-ons, om meer informatie te vinden over de JPO minecraft bot kunt u kijken op jpo-geocraft.nl/_JPO_.`);
+  }
+}
 
-    if (msg.includes("-> you] withdraw")) {
-      const withdrawMatch = msg.match(/\[([^\]]+)\s->\syou\] withdraw (\d+(\.\d+)?)/);
-      if (withdrawMatch) {
-        const sender = withdrawMatch[1];
-        const withdrawAmount = parseFloat(withdrawMatch[2]);
 
-        fs.readFile('../../gebruikers.json', 'utf8', (err, data) => {
-          if (err) {
-            return;
-          }
+if (msg.includes("-> you] withdraw")) {
+  const withdrawMatch = msg.match(/\[([^\]]+)\s->\syou\] withdraw (\d+(\.\d+)?)/);
+  if (withdrawMatch) {
+    const sender = withdrawMatch[1];
+    const withdrawAmount = parseFloat(withdrawMatch[2]);
 
-          let gebruikers = [];
-          try {
-            gebruikers = JSON.parse(data);
-          } catch (parseError) {
-            return;
-          }
-
-          const user = gebruikers.find(user => user.name === sender);
-
-          if (user) {
-            if (user.geo >= withdrawAmount) {
-              user.geo -= withdrawAmount;
-              fs.writeFile('../../gebruikers.json', JSON.stringify(gebruikers, null, 2), (err) => {
-                if (err) {
-                  return;
-                }
-
-                bot.chat(`/pay ${sender} ${withdrawAmount}`);
-                bot.chat(`/msg ${sender} ${sender}, u heeft ${withdrawAmount} Geo van uw JPO account af gehaald.`);
-              });
-            } else {
-              bot.chat(`/msg ${sender} ${sender}, u heeft niet genoeg saldo, u heeft maar ${user.geo} Geo op uw JPO account.`);
-            }
-          } else {
-            bot.chat(`/msg ${sender} ${sender}, geen account herkend op de JPO website.`);
-          }
-        });
-      } else {
+    fs.readFile('../../gebruikers.json', 'utf8', (err, data) => {
+      if (err) {
+        return;
       }
-    }
+
+      let gebruikers = [];
+      try {
+        gebruikers = JSON.parse(data);
+      } catch (parseError) {
+        return;
+      }
+
+      const user = gebruikers.find(user => user.name === sender);
+
+      if (user) {
+        if (user.geo >= withdrawAmount) {
+          user.geo -= withdrawAmount;
+          fs.writeFile('../../gebruikers.json', JSON.stringify(gebruikers, null, 2), (err) => {
+            if (err) {
+              return;
+            }
+
+            bot.chat(`/pay ${sender} ${withdrawAmount}`);
+            bot.chat(`/msg ${sender} ${sender}, u heeft ${withdrawAmount} Geo van uw JPO account af gehaald.`);
+          });
+        } else {
+          bot.chat(`/msg ${sender} ${sender}, u heeft niet genoeg saldo, u heeft maar ${user.geo} Geo op uw JPO account.`);
+        }
+      } else {
+        bot.chat(`/msg ${sender} ${sender}, geen account herkend op de JPO website.`);
+      }
+    });
+  } else {
+    const sender = msg.match(/\[([^\]]+)\s->\syou\] withdraw/)[1];
+    bot.chat(`/msg ${sender} ${sender}, gebruik /msg _JPO_ withdraw <aantal Geo>.`);
+  }
+}
 
 if (msg.includes("-> you] deposit")) {
   const depositMatch = msg.match(/\[([^\]]+)\s->\syou\] deposit (\d+(\.\d+)?)/);
@@ -101,7 +124,9 @@ if (msg.includes("-> you] deposit")) {
     const depositAmount = parseFloat(depositMatch[2]);
 
     bot.chat(`/betaalverzoek ${sender} ${depositAmount}`);
-
+  } else {
+    const sender = msg.match(/\[([^\]]+)\s->\syou\] deposit/)[1];
+    bot.chat(`/msg ${sender} ${sender}, gebruik /msg _JPO_ deposit <aantal Geo>.`);
   }
 }
 
@@ -138,74 +163,79 @@ if (msg.includes("-> you] balance")) {
   }
 }
 
-    if (msg.includes("-> you] login")) {
-      const nameMatch = msg.match(/\[([^\]]+)\s->/);
-      const tokenMatch = msg.match(/login (\d+)/);
+if (msg.includes("-> you] login")) {
+  const nameMatch = msg.match(/\[([^\]]+)\s->/);
+  const tokenMatch = msg.match(/login (\d+)/);
 
-      if (nameMatch && tokenMatch) {
-        const name = nameMatch[1].toLowerCase();
-        const token = tokenMatch[1];
+  if (nameMatch && tokenMatch) {
+    const name = nameMatch[1].toLowerCase();
+    const token = tokenMatch[1];
 
-        fs.readFile('../../login-tokens.json', 'utf8', (err, data) => {
+    fs.readFile('../../login-tokens.json', 'utf8', (err, data) => {
+      if (err) {
+        return;
+      }
+
+      let loginTokens = [];
+      try {
+        loginTokens = JSON.parse(data);
+      } catch (parseError) {
+        return;
+      }
+
+      const tokenOwner = loginTokens.find(tokenData =>
+        String(tokenData.token) === token && tokenData.name.toLowerCase() === name
+      );
+
+      if (tokenOwner) {
+        const successfulLogin = {
+          name: tokenOwner.name,
+          token: token
+        };
+
+        loginTokens = loginTokens.filter(tokenData => tokenData.name.toLowerCase() !== name);
+
+        fs.readFile('../../login-succes.json', 'utf8', (err, successData) => {
           if (err) {
             return;
           }
 
-          let loginTokens = [];
+          let successLog = [];
           try {
-            loginTokens = JSON.parse(data);
+            if (successData) {
+              successLog = JSON.parse(successData);
+            }
           } catch (parseError) {
-            return;
+            successLog = [];
           }
 
-          const tokenOwner = loginTokens.find(tokenData =>
-            String(tokenData.token) === token && tokenData.name.toLowerCase() === name
-          );
-          if (tokenOwner) {
+          successLog.push(successfulLogin);
 
-            const successfulLogin = {
-              name: tokenOwner.name,
-              token: token
-            };
+          fs.writeFile('../../login-succes.json', JSON.stringify(successLog, null, 2), (err) => {
+            if (err) {
+              return;
+            } else {
+              bot.chat(`/msg ${tokenOwner.name} ${tokenOwner.name}, succesvol ingelogd op de JPO website.`);
+            }
+          });
+        });
 
-            loginTokens = loginTokens.filter(tokenData => tokenData.name.toLowerCase() !== name);
-
-            fs.readFile('../../login-succes.json', 'utf8', (err, successData) => {
-              if (err) {
-              }
-
-              let successLog = [];
-              try {
-                if (successData) {
-                  successLog = JSON.parse(successData);
-                }
-              } catch (parseError) {
-                successLog = [];
-              }
-
-              successLog.push(successfulLogin);
-
-              fs.writeFile('../../login-succes.json', JSON.stringify(successLog, null, 2), (err) => {
-                if (err) {
-                } else {
-                  bot.chat(`/msg ${tokenOwner.name} ${tokenOwner.name}, succesvol ingelogd op de JPO website.`);
-                }
-              });
-            });
-
-            fs.writeFile('../../login-tokens.json', JSON.stringify(loginTokens, null, 2), (err) => {
-              if (err) {
-              } else {
-              }
-            });
-          } else {
-            bot.chat(`/msg ${name} ${name}, onjuist token, probeer het opnieuw.`);
+        fs.writeFile('../../login-tokens.json', JSON.stringify(loginTokens, null, 2), (err) => {
+          if (err) {
+            return;
           }
         });
       } else {
-        console.log("Onjuiste berichtindeling, kon naam of token niet extraheren.");
+        bot.chat(`/msg ${name} ${name}, onjuist token, probeer het opnieuw.`);
       }
-    }
+    });
+  } else {
+    const name = nameMatch ? nameMatch[1] : 'Onbekende gebruiker';
+    console.log("Onjuiste berichtindeling, kon naam of token niet extraheren.");
+    bot.chat(`/msg ${name} ${name}, gebruik /msg _JPO_ login <login-token>. U kunt uw login token vinden op jpo-geocraft.nl/login.`);
+  }
+}
+
 
 if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you receive") && msg.toLowerCase().includes("geo from")) {
   	const geoMatch = msg.match(/You receive ([\d,.]+) Geo from ([^\s]+)/i);
@@ -225,7 +255,6 @@ if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you
 
     	fs.readFile('../../gebruikers.json', 'utf8', (err, data) => {
       	if (err) {
-        	console.log('Fout bij het lezen van gebruikers.json:', err);
         	return;
       	}
 
@@ -233,7 +262,6 @@ if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you
       	try {
         	gebruikers = JSON.parse(data);
       	} catch (parseError) {
-        	console.log('Fout bij het parsen van gebruikers.json:', parseError);
         	return;
       	}
 
@@ -249,7 +277,6 @@ if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you
           	if (err) {
             	console.log('Fout bij het opslaan van gebruikers.json:', err);
           	} else {
-            	console.log(`${geoAmount} Geo toegevoegd aan ${sender}. Nieuw totaal: ${geoTotaalFormatted} Geo.`);
             	bot.chat(`/msg ${sender} ${sender}, u heeft ${geoAmount} gestort op uw JPO account, u heeft nu ${geoTotaalFormatted} Geo op uw JPO account.`);
           	}
         	});
@@ -257,7 +284,7 @@ if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you
         	console.log(`Gebruiker ${sender} niet gevonden, Geo wordt teruggestort.`);
 
         	bot.chat(`/pay ${sender} ${geoAmount}`);
-        	bot.chat(`/msg ${sender} ${sender}, Geo teruggestort, geen account herkend op de JPO website.`);
+        	bot.chat(`/msg ${sender} ${sender}, Geo teruggestort, geen account herkend op de JPO website, log in op jpo-geocraft.nl/login om Geo te kunnen storten op uw account.`);
       	}
     	});
   	   }
