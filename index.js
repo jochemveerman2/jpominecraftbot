@@ -52,6 +52,10 @@ function createBot() {
       bot.chat("/tpaccept");
     }
     
+    if (msg.includes("[EarlierMussel4 -> you] sit")) {
+      bot.chat("/sit");
+    }
+    
 if (msg.includes("-> you] website")) {
   const senderMatch = msg.match(/\[([^\]]+)\s->\syou\] website/);
   
