@@ -339,6 +339,5 @@ if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you
   	   }
      }
   });
-}
 
 createBot();
