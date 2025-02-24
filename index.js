@@ -90,7 +90,7 @@ function createBot() {
       bot.chat("/tpaccept");
     }
     
-if (msg.includes("-> you] website")) {
+if (msg.startsWith("✉ [") && msg.includes("-> you] website")) {
   const senderMatch = msg.match(/\[([^\]]+)\s->\syou\] website/);
   
   if (senderMatch) {
@@ -100,7 +100,7 @@ if (msg.includes("-> you] website")) {
   }
 }
     
-if (msg.includes("-> you] info")) {
+if (msg.startsWith("✉ [") && msg.includes("-> you] info")) {
   const senderMatch = msg.match(/\[([^\]]+)\s->\syou\] info/);
   
   if (senderMatch) {
@@ -168,7 +168,7 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] deposit")) {
   }
 }
 
-if (msg.includes("-> you] balance")) {
+if (msg.startsWith("✉ [") && msg.includes("-> you] balance")) {
   const balMatch = msg.match(/\[([^\]]+)\s->\syou\] (balance)(\s+([^\s]+))?/);
   if (balMatch) {
     const sender = balMatch[1]; 
@@ -201,7 +201,7 @@ if (msg.includes("-> you] balance")) {
   }
 }
 
-if (msg.includes("-> you] login")) {
+if (msg.startsWith("✉ [") && msg.includes("-> you] login")) {
   const nameMatch = msg.match(/\[([^\]]+)\s->/);
   const tokenMatch = msg.match(/login (\d+)/);
 
@@ -250,7 +250,7 @@ if (msg.includes("-> you] login")) {
   }
 }
     
-if (msg.includes("-> you] todoparati-login")) {
+if (msg.startsWith("✉ [") && msg.includes("-> you] todoparati-login")) {
   const nameMatch = msg.match(/\[([^\]]+)\s->/);
   const tokenMatch = msg.match(/login (\d+)/);
 
