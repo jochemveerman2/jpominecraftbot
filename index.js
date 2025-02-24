@@ -6,6 +6,7 @@ const axios = require('axios');
 let closestPlayer = null;
 let closestDistance = Infinity;  
 let lastSneakState = false; 
+let isSitting = false;
 let botStatus = {
   online: false
 };
@@ -38,29 +39,25 @@ function createBot() {
   });
 
   bot.on('entityMoved', (entity) => {
+    if (isSitting) return; 
+  
     if (entity.type === 'player' && entity !== bot.entity) {
       const distance = bot.entity.position.distanceTo(entity.position);
       if (distance < 10) { 
         bot.lookAt(entity.position.offset(0, 1, 0), true); 
   
         const isSneaking = entity.metadata && entity.metadata[0] && (entity.metadata[0] & 0x02) !== 0;
-  
        const shouldSneak = Boolean(isSneaking);  
   
         if (shouldSneak !== lastSneakState) {
           lastSneakState = shouldSneak;
           bot.setControlState('sneak', shouldSneak);
         }
-
-        if (shouldSneak) {
-          bot.setControlState('sneak', true);
-        } else {
-          bot.setControlState('sneak', false);
-        }
+  
+        bot.setControlState('sneak', shouldSneak);
       }
     }
   });
-
 
   bot.on('error', (err) => {
     console.log('Er is een fout opgetreden:', err);
@@ -81,10 +78,19 @@ function createBot() {
       bot.chat("/tpaccept");
     }
     
-    if (msg.includes("[EarlierMussel4 -> you] sit") || msg.includes("[EarlierMussel4 -> you] zit")) {
+    if (msg.includes("[EarlierMussel4 -> you] sit") || msg.includes("[EarlierMussel4 -> you] zit") || msg.includes("[EarlierMussel4 -> you] zitten")) {
       bot.chat("/sit");
       bot.chat("/msg EarlierMussel4 Ik zit.");
+      isSitting = true;
     }
+    
+    if (msg.includes("[EarlierMussel4 -> you] sta") || msg.includes("[EarlierMussel4 -> you] staan")) {
+      bot.chat("/msg EarlierMussel4 Ik sta.");
+      bot.setControlState('sneak', true);
+      setTimeout(() => bot.setControlState('sneak', false), 300);
+      isSitting = false;
+   }
+
     
     if (msg.includes("EarlierMussel4 wants you to teleport to them!")) {
       bot.chat("/tpaccept");
