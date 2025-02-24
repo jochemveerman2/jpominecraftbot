@@ -283,7 +283,7 @@ if (msg.includes("-> you] todoparati-login")) {
     });
   } else {
     const name = nameMatch ? nameMatch[1] : 'Onbekende gebruiker';
-    bot.chat(`/msg ${name} ${name}, gebruik /msg _JPO_ login <login-token>. U kunt uw login token vinden op jpo-todoparati.nl/login.`);
+    bot.chat(`/msg ${name} ${name}, gebruik /msg _JPO_ todoparati-login <login-token>. U kunt uw login token vinden op todoparati.nl/login.`);
   }
 }
     
