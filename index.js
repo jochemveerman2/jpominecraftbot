@@ -111,7 +111,7 @@ if (msg.includes("-> you] info")) {
 }
 
 
-if (msg.includes("-> you] withdraw")) {
+if (msg.startsWith("✉ [") && msg.includes("-> you] withdraw")) {
   const withdrawMatch = msg.match(/\[([^\]]+)\s->\syou\] withdraw (\d+(\.\d+)?)/);
   if (withdrawMatch) {
     const sender = withdrawMatch[1];
@@ -155,7 +155,7 @@ if (msg.includes("-> you] withdraw")) {
   }
 }
 
-if (msg.includes("-> you] deposit")) {
+if (msg.startsWith("✉ [") && msg.includes("-> you] deposit")) {
   const depositMatch = msg.match(/\[([^\]]+)\s->\syou\] deposit (\d+(\.\d+)?)/);
   if (depositMatch) {
     const sender = depositMatch[1];
