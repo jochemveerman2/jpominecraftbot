@@ -30,30 +30,11 @@ function createBot() {
     checkTimeoutInterval: 60000,
     version: '1.17.1'  
   });
-
+  
   bot.on('spawn', () => {
     botStatus = {
-      online: true
+     online: true
     };
-  });
-
-bot.on('entityMoved', (entity) => {
-  if (entity.type === 'player' && entity !== bot.entity) {
-    const distance = bot.entity.position.distanceTo(entity.position);
-    if (distance < 10) { 
-      bot.lookAt(entity.position.offset(0, 1, 0), true);
-
-      const isSneaking = entity.metadata && entity.metadata[0] && (entity.metadata[0] & 0x02) !== 0;
-  
-      const shouldSneak = Boolean(isSneaking);
-  
-      if (shouldSneak !== lastSneakState) {
-        lastSneakState = shouldSneak;
-        bot.setControlState('sneak', shouldSneak);
-      }
-    }
-  }
-});
 
   bot.on('entityMoved', (entity) => {
     if (entity.type === 'player' && entity !== bot.entity) {
