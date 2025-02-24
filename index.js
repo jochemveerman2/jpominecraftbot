@@ -1,7 +1,9 @@
 const mineflayer = require('mineflayer');
 const fs = require('fs');
 const express = require('express');
+const axios = require('axios');
 
+let lastSneakState = null;
 let botStatus = {
   online: false
 };
@@ -31,6 +33,24 @@ function createBot() {
     botStatus = {
       online: true
     };
+  });
+
+  bot.on('entityMoved', (entity) => {
+    if (entity.type === 'player' && entity !== bot.entity) {
+      const distance = bot.entity.position.distanceTo(entity.position);
+      if (distance < 10) { 
+        bot.lookAt(entity.position.offset(0, 1, 0), true); 
+  
+        const isSneaking = entity.metadata && entity.metadata[0] && (entity.metadata[0] & 0x02) !== 0;
+  
+        const shouldSneak = Boolean(isSneaking);  
+  
+        if (shouldSneak !== lastSneakState) {
+          lastSneakState = shouldSneak;
+          bot.setControlState('sneak', shouldSneak);
+        }
+      }
+    }
   });
 
   bot.on('error', (err) => {
@@ -175,72 +195,96 @@ if (msg.includes("-> you] login")) {
     const name = nameMatch[1].toLowerCase();
     const token = tokenMatch[1];
 
-    fs.readFile('../../login-tokens.json', 'utf8', (err, data) => {
+    fs.readFile('tokens.json', 'utf8', (err, data) => {
       if (err) {
         return;
       }
 
-      let loginTokens = [];
+      let tokens;
       try {
-        loginTokens = JSON.parse(data);
+        tokens = JSON.parse(data);
       } catch (parseError) {
         return;
       }
 
-      const tokenOwner = loginTokens.find(tokenData =>
-        String(tokenData.token) === token && tokenData.name.toLowerCase() === name
-      );
+      const apiToken = tokens.jpo; 
 
-      if (tokenOwner) {
-        const successfulLogin = {
-          name: tokenOwner.name,
-          token: token
-        };
-
-        loginTokens = loginTokens.filter(tokenData => tokenData.name.toLowerCase() !== name);
-
-        fs.readFile('../../login-succes.json', 'utf8', (err, successData) => {
-          if (err) {
-            return;
-          }
-
-          let successLog = [];
-          try {
-            if (successData) {
-              successLog = JSON.parse(successData);
-            }
-          } catch (parseError) {
-            successLog = [];
-          }
-
-          successLog.push(successfulLogin);
-
-          fs.writeFile('../../login-succes.json', JSON.stringify(successLog, null, 2), (err) => {
-            if (err) {
-              return;
-            } else {
-              bot.chat(`/msg ${tokenOwner.name} ${tokenOwner.name}, succesvol ingelogd op de JPO website.`);
-            }
-          });
-        });
-
-        fs.writeFile('../../login-tokens.json', JSON.stringify(loginTokens, null, 2), (err) => {
-          if (err) {
-            return;
-          }
-        });
-      } else {
-        bot.chat(`/msg ${name} ${name}, onjuist token, probeer het opnieuw.`);
+      if (!apiToken) {
+        bot.chat(`/msg ${name} De API-token voor JPO is niet gevonden, neem contact op in het JPO kanaal in de GeoCraft discord.`);
+        return;
       }
+
+      const url = `https://jpo-geocraft.nl/api/v1/login/login?apitoken=${apiToken}&token=${token}&minecraftnaam=${name}`;
+
+      axios.get(url)
+        .then(response => {
+          const data = response.data;
+
+          if (data.error) {
+            bot.chat(`/msg ${name} ${name}, ${data.error}`);
+          } else {
+            bot.chat(`/msg ${data.name} ${data.name}, succesvol ingelogd op de JPO website.`);
+          }
+        })
+        .catch(error => {
+          bot.chat(`/msg ${name} ${name}, er is een fout opgetreden tijdens het inloggen. Probeer het opnieuw.`);
+        });
     });
   } else {
     const name = nameMatch ? nameMatch[1] : 'Onbekende gebruiker';
-    console.log("Onjuiste berichtindeling, kon naam of token niet extraheren.");
     bot.chat(`/msg ${name} ${name}, gebruik /msg _JPO_ login <login-token>. U kunt uw login token vinden op jpo-geocraft.nl/login.`);
   }
 }
+    
+if (msg.includes("-> you] todoparati-login")) {
+  const nameMatch = msg.match(/\[([^\]]+)\s->/);
+  const tokenMatch = msg.match(/login (\d+)/);
 
+  if (nameMatch && tokenMatch) {
+    const name = nameMatch[1].toLowerCase();
+    const token = tokenMatch[1];
 
+    fs.readFile('tokens.json', 'utf8', (err, data) => {
+      if (err) {
+        return;
+      }
+
+      let tokens;
+      try {
+        tokens = JSON.parse(data);
+      } catch (parseError) {
+        return;
+      }
+
+      const apiToken = tokens.todoparati; 
+
+      if (!apiToken) {
+        bot.chat(`/msg ${name} De API-token voor TodoParati is niet gevonden, neem contact op in het TodoParati kanaal in de GeoCraft discord.`);
+        return;
+      }
+
+      const url = `https://todoparati.nl/api/v1/login/login?apitoken=${apiToken}&token=${token}&minecraftnaam=${name}`;
+
+      axios.get(url)
+        .then(response => {
+          const data = response.data;
+
+          if (data.error) {
+            bot.chat(`/msg ${name} ${name}, ${data.error}`);
+          } else {
+            bot.chat(`/msg ${data.name} ${data.name}, succesvol ingelogd op de TodoParati website.`);
+          }
+        })
+        .catch(error => {
+          bot.chat(`/msg ${name} ${name}, er is een fout opgetreden tijdens het inloggen. Probeer het opnieuw.`);
+        });
+    });
+  } else {
+    const name = nameMatch ? nameMatch[1] : 'Onbekende gebruiker';
+    bot.chat(`/msg ${name} ${name}, gebruik /msg _JPO_ login <login-token>. U kunt uw login token vinden op jpo-todoparati.nl/login.`);
+  }
+}
+    
 if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you receive") && msg.toLowerCase().includes("geo from")) {
   	const geoMatch = msg.match(/You receive ([\d,.]+) Geo from ([^\s]+)/i);
 
