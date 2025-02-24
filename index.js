@@ -30,11 +30,12 @@ function createBot() {
     checkTimeoutInterval: 60000,
     version: '1.17.1'  
   });
-  
+
   bot.on('spawn', () => {
     botStatus = {
-     online: true
+      online: true
     };
+  });
 
   bot.on('entityMoved', (entity) => {
     if (entity.type === 'player' && entity !== bot.entity) {
@@ -339,5 +340,6 @@ if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you
   	   }
      }
   });
+}
 
 createBot();
