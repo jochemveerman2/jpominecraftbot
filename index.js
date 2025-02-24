@@ -45,15 +45,22 @@ function createBot() {
   
         const isSneaking = entity.metadata && entity.metadata[0] && (entity.metadata[0] & 0x02) !== 0;
   
-        const shouldSneak = Boolean(isSneaking);  
+       const shouldSneak = Boolean(isSneaking);  
   
         if (shouldSneak !== lastSneakState) {
           lastSneakState = shouldSneak;
           bot.setControlState('sneak', shouldSneak);
         }
+
+        if (shouldSneak) {
+          bot.setControlState('sneak', true);
+        } else {
+          bot.setControlState('sneak', false);
+        }
       }
     }
   });
+
 
   bot.on('error', (err) => {
     console.log('Er is een fout opgetreden:', err);
@@ -76,6 +83,11 @@ function createBot() {
     
     if (msg.includes("[EarlierMussel4 -> you] sit")) {
       bot.chat("/sit");
+      bot.chat("/msg EarlierMussel4 Ik zit.");
+    }
+    
+    if (msg.includes("EarlierMussel4 wants you to teleport to them!")) {
+      bot.chat("/tpaccept");
     }
     
 if (msg.includes("-> you] website")) {
