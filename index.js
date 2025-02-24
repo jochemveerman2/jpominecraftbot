@@ -4,7 +4,8 @@ const express = require('express');
 const axios = require('axios');
 
 let closestPlayer = null;
-let closestDistance = Infinity;
+let closestDistance = Infinity;  
+let lastSneakState = false; 
 let botStatus = {
   online: false
 };
@@ -54,28 +55,23 @@ bot.on('entityMoved', (entity) => {
   }
 });
 
-bot.on('entityMoved', (entity) => {
-  if (entity.type === 'player' && entity !== bot.entity) {
-    const distance = bot.entity.position.distanceTo(entity.position);
-    if (distance < closestDistance) {
-      closestDistance = distance;
-      closestPlayer = entity;
-    }
-  }
-
-  if (closestPlayer) {
-    bot.lookAt(closestPlayer.position.offset(0, 1, 0), true);
-
-    const isSneaking = closestPlayer.metadata && closestPlayer.metadata[0] && (closestPlayer.metadata[0] & 0x02) !== 0;
+  bot.on('entityMoved', (entity) => {
+    if (entity.type === 'player' && entity !== bot.entity) {
+      const distance = bot.entity.position.distanceTo(entity.position);
+      if (distance < 10) { 
+        bot.lookAt(entity.position.offset(0, 1, 0), true); 
   
-    const shouldSneak = Boolean(isSneaking);
+        const isSneaking = entity.metadata && entity.metadata[0] && (entity.metadata[0] & 0x02) !== 0;
   
-    if (shouldSneak !== lastSneakState) {
-      lastSneakState = shouldSneak;
-      bot.setControlState('sneak', shouldSneak);
+        const shouldSneak = Boolean(isSneaking);  
+  
+        if (shouldSneak !== lastSneakState) {
+          lastSneakState = shouldSneak;
+          bot.setControlState('sneak', shouldSneak);
+        }
+      }
     }
-  }
-});
+  });
 
   bot.on('error', (err) => {
     console.log('Er is een fout opgetreden:', err);
