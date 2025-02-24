@@ -81,7 +81,7 @@ function createBot() {
       bot.chat("/tpaccept");
     }
     
-    if (msg.includes("[EarlierMussel4 -> you] sit")) {
+    if (msg.includes("[EarlierMussel4 -> you] sit") || msg.includes("[EarlierMussel4 -> you] zit")) {
       bot.chat("/sit");
       bot.chat("/msg EarlierMussel4 Ik zit.");
     }
