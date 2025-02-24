@@ -2,6 +2,7 @@ const mineflayer = require('mineflayer');
 const fs = require('fs');
 const express = require('express');
 const axios = require('axios');
+const config = require('./config.json');
 
 let closestPlayer = null;
 let closestDistance = Infinity;  
@@ -18,18 +19,15 @@ app.get('/status', (req, res) => {
   res.json(botStatus);
 });
 
-app.listen(port, () => {
-});
-
 function createBot() {
   const bot = mineflayer.createBot({
-    host: 'geocraft.nl',
-    port: 25565,
-    username: "_JPO_",
-    auth: "microsoft",
-    keepAlive: true,
-    checkTimeoutInterval: 60000,
-    version: '1.17.1'  
+    host: config.host,
+    port: config.port,
+    username: config.username,
+    auth: config.auth,
+    keepAlive: config.keepAlive,
+    checkTimeoutInterval: config.checkTimeoutInterval,
+    version: config.version  
   });
 
   bot.on('spawn', () => {
@@ -101,6 +99,18 @@ function createBot() {
       isFreeze = false;
    }
     
+    if (msg.includes("[EarlierMussel4 -> you] shift") || msg.includes("[EarlierMussel4 -> you] sneak")) {
+      bot.chat("/msg EarlierMussel4 Ik shift.");
+      bot.setControlState('sneak', true);
+      isFreeze = true;
+   }
+    
+    if (msg.includes("[EarlierMussel4 -> you] unshift") || msg.includes("[EarlierMussel4 -> you] unsneak")) {
+      bot.chat("/msg EarlierMussel4 Ik stop met shiften.");
+      bot.setControlState('sneak', false);
+      isFreeze = false;
+   }
+    
     if (msg.includes("EarlierMussel4 wants you to teleport to them!")) {
       bot.chat("/tpaccept");
     }
@@ -127,7 +137,7 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] info")) {
 
 
 if (msg.startsWith("✉ [") && msg.includes("-> you] withdraw")) {
-  const withdrawMatch = msg.match(/\[([^\]]+)\s->\syou\] withdraw (\d+(\.\d+)?)/);
+  const withdrawMatch = msg.match(/\[([^\]]+)\s->\syou\]\s+\[([^\]]+)\s->\syou\]\swithdraw\s(\d+(\.\d+)?)/);
   if (withdrawMatch) {
     const sender = withdrawMatch[1];
     const withdrawAmount = parseFloat(withdrawMatch[2]);
@@ -156,6 +166,10 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] withdraw")) {
 
             bot.chat(`/pay ${sender} ${withdrawAmount}`);
             bot.chat(`/msg ${sender} ${sender}, u heeft ${withdrawAmount} Geo van uw JPO account af gehaald.`);
+            const discordUrl = `http://${config.discord_api_ip}:${config.discord_api_port}/send`;
+            const titleParam = "Transactie";
+            const textParam = `De JPO gebruiker **${sender}** heeft **${withdrawAmount}** van zijn/haar account af gehaalt..`;
+            axios.get(discordUrl, { params: { titel: titleParam, tekst: textParam } })
           });
         } else {
           bot.chat(`/msg ${sender} ${sender}, u heeft niet genoeg saldo, u heeft maar ${user.geo} Geo op uw JPO account.`);
@@ -171,7 +185,7 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] withdraw")) {
 }
 
 if (msg.startsWith("✉ [") && msg.includes("-> you] deposit")) {
-  const depositMatch = msg.match(/\[([^\]]+)\s->\syou\] deposit (\d+(\.\d+)?)/);
+  const depositMatch = msg.match(/\[([^\]]+)\s->\syou\]\s+\[([^\]]+)\s->\syou\]\sdeposit\s(\d+(\.\d+)?)/);
   if (depositMatch) {
     const sender = depositMatch[1];
     const depositAmount = parseFloat(depositMatch[2]);
@@ -253,6 +267,10 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] login")) {
             bot.chat(`/msg ${name} ${name}, ${data.error}`);
           } else {
             bot.chat(`/msg ${data.name} ${data.name}, succesvol ingelogd op de JPO website.`);
+            const discordUrl = `http://${config.discord_api_ip}:${config.discord_api_port}/send`;
+            const titleParam = "Login";
+            const textParam = `Succevolle login door de gebruiken **${name}** op de JPO website.`;
+            axios.get(discordUrl, { params: { titel: titleParam, tekst: textParam } })
           }
         })
         .catch(error => {
@@ -302,6 +320,10 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] todoparati-login")) {
             bot.chat(`/msg ${name} ${name}, ${data.error}`);
           } else {
             bot.chat(`/msg ${data.name} ${data.name}, succesvol ingelogd op de TodoParati website.`);
+            const discordUrl = `http://${config.discord_api_ip}:${config.discord_api_port}/send`;
+            const titleParam = "Login";
+            const textParam = `Succevolle login door de gebruiken **${name}** op de TodoParati website.`;
+            axios.get(discordUrl, { params: { titel: titleParam, tekst: textParam } })
           }
         })
         .catch(error => {
@@ -355,6 +377,10 @@ if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you
             	console.log('Fout bij het opslaan van gebruikers.json:', err);
           	} else {
             	bot.chat(`/msg ${sender} ${sender}, u heeft ${geoAmount} gestort op uw JPO account, u heeft nu ${geoTotaalFormatted} Geo op uw JPO account.`);
+                const discordUrl = `http://${config.discord_api_ip}:${config.discord_api_port}/send`;
+                const titleParam = "Transactie";
+                const textParam = `De JPO gebruiker **${name}** heeft **${geoAmmount} op zijn/haar account gestord en heeft nu totaal **${geoTotaalFormatted} op zijn/haar account.`;
+                axios.get(discordUrl, { params: { titel: titleParam, tekst: textParam } })
           	}
         	});
       	} else {
