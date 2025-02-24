@@ -6,7 +6,7 @@ const axios = require('axios');
 let closestPlayer = null;
 let closestDistance = Infinity;  
 let lastSneakState = false; 
-let isSitting = false;
+let isFreeze = false;
 let botStatus = {
   online: false
 };
@@ -39,7 +39,7 @@ function createBot() {
   });
 
   bot.on('entityMoved', (entity) => {
-    if (isSitting) return; 
+    if (isFreeze) return; 
   
     if (entity.type === 'player' && entity !== bot.entity) {
       const distance = bot.entity.position.distanceTo(entity.position);
@@ -81,16 +81,25 @@ function createBot() {
     if (msg.includes("[EarlierMussel4 -> you] sit") || msg.includes("[EarlierMussel4 -> you] zit") || msg.includes("[EarlierMussel4 -> you] zitten")) {
       bot.chat("/sit");
       bot.chat("/msg EarlierMussel4 Ik zit.");
-      isSitting = true;
+      isFreeze = true;
     }
     
     if (msg.includes("[EarlierMussel4 -> you] sta") || msg.includes("[EarlierMussel4 -> you] staan")) {
       bot.chat("/msg EarlierMussel4 Ik sta.");
       bot.setControlState('sneak', true);
       setTimeout(() => bot.setControlState('sneak', false), 300);
-      isSitting = false;
+      isFreeze = false;
    }
-
+    
+    if (msg.includes("[EarlierMussel4 -> you] freeze")) {
+      bot.chat("/msg EarlierMussel4 Ik ben bevroren.");
+      isFreeze = true;
+   }
+    
+    if (msg.includes("[EarlierMussel4 -> you] unfreeze")) {
+      bot.chat("/msg EarlierMussel4 Ik ben ontdooit.");
+      isFreeze = false;
+   }
     
     if (msg.includes("EarlierMussel4 wants you to teleport to them!")) {
       bot.chat("/tpaccept");
