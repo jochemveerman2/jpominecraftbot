@@ -135,15 +135,16 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] info")) {
   }
 }
 
-
-if (msg.startsWith("✉ [") && msg.includes("-> you] withdraw")) {
-  const withdrawMatch = msg.match(/\[([^\]]+)\s->\syou\]\s+\[([^\]]+)\s->\syou\]\swithdraw\s(\d+(\.\d+)?)/);
+if (msg.startsWith("✉ [") && msg.toLowerCase().includes("withdraw")) {
+  const withdrawMatch = msg.match(/^\s*✉\s+\[([^\]]+)\s*->\s*you\](?:\s+\[[^\]]+\s*->\s*you\])?\s+withdraw\s+(\d+(?:\.\d+)?)/i);
+  
   if (withdrawMatch) {
-    const sender = withdrawMatch[1];
+    const sender = withdrawMatch[1].trim();
     const withdrawAmount = parseFloat(withdrawMatch[2]);
 
     fs.readFile('../../gebruikers.json', 'utf8', (err, data) => {
       if (err) {
+        console.error("Fout bij het lezen van gebruikers.json:", err);
         return;
       }
 
@@ -151,16 +152,17 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] withdraw")) {
       try {
         gebruikers = JSON.parse(data);
       } catch (parseError) {
+        console.error("Fout bij het parsen van gebruikers.json:", parseError);
         return;
       }
 
-      const user = gebruikers.find(user => user.name === sender);
-
+      const user = gebruikers.find(u => u.name.toLowerCase() === sender.toLowerCase());
       if (user) {
         if (user.geo >= withdrawAmount) {
           user.geo -= withdrawAmount;
           fs.writeFile('../../gebruikers.json', JSON.stringify(gebruikers, null, 2), (err) => {
             if (err) {
+              console.error("Fout bij het opslaan van gebruikers.json:", err);
               return;
             }
 
@@ -168,8 +170,14 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] withdraw")) {
             bot.chat(`/msg ${sender} ${sender}, u heeft ${withdrawAmount} Geo van uw JPO account af gehaald.`);
             const discordUrl = `http://${config.discord_api_ip}:${config.discord_api_port}/send`;
             const titleParam = "Transactie";
-            const textParam = `De JPO gebruiker **${sender}** heeft **${withdrawAmount}** van zijn/haar account af gehaalt..`;
+            const textParam = `De JPO gebruiker **${sender}** heeft **${withdrawAmount}** Geo van zijn/haar account af gehaald.`;
             axios.get(discordUrl, { params: { titel: titleParam, tekst: textParam } })
+              .then(response => {
+                console.log("Discord notificatie voor withdraw verstuurd.");
+              })
+              .catch(error => {
+                console.error("Fout bij versturen van Discord notificatie voor withdraw:", error);
+              });
           });
         } else {
           bot.chat(`/msg ${sender} ${sender}, u heeft niet genoeg saldo, u heeft maar ${user.geo} Geo op uw JPO account.`);
@@ -179,21 +187,30 @@ if (msg.startsWith("✉ [") && msg.includes("-> you] withdraw")) {
       }
     });
   } else {
-    const sender = msg.match(/\[([^\]]+)\s->\syou\] withdraw/)[1];
+    const senderMatch = msg.match(/\[([^\]]+)\s*->\s*you\]/);
+    const sender = senderMatch ? senderMatch[1].trim() : "Onbekende gebruiker";
     bot.chat(`/msg ${sender} ${sender}, gebruik /msg _JPO_ withdraw <aantal Geo>.`);
   }
 }
 
 if (msg.startsWith("✉ [") && msg.includes("-> you] deposit")) {
-  const depositMatch = msg.match(/\[([^\]]+)\s->\syou\]\s+\[([^\]]+)\s->\syou\]\sdeposit\s(\d+(\.\d+)?)/);
+  const depositMatch = msg.match(/\[([^\]]+)\s->\syou\](?:\s+\[[^\]]+\s->\syou\])?\sdeposit\s(\d+(\.\d+)?)/);
+  
   if (depositMatch) {
-    const sender = depositMatch[1];
-    const depositAmount = parseFloat(depositMatch[2]);
+    const sender = depositMatch[1]; 
+    const depositAmount = parseFloat(depositMatch[2]); 
 
-    bot.chat(`/betaalverzoek ${sender} ${depositAmount}`);
+    if (!isNaN(depositAmount) && depositAmount > 0) {
+      bot.chat(`/betaalverzoek ${sender} ${depositAmount}`);
+    } else {
+      bot.chat(`/msg ${sender} Het bedrag dat u heeft ingevuld is niet geldig.`);
+    }
   } else {
-    const sender = msg.match(/\[([^\]]+)\s->\syou\] deposit/)[1];
-    bot.chat(`/msg ${sender} ${sender}, gebruik /msg _JPO_ deposit <aantal Geo>.`);
+    const senderMatch = msg.match(/\[([^\]]+)\s->\syou\] deposit/);
+    if (senderMatch) {
+      const sender = senderMatch[1];
+      bot.chat(`/msg ${sender} ${sender}, gebruik /msg _JPO_ deposit <aantal Geo>.`);
+    }
   }
 }
 
@@ -379,7 +396,7 @@ if (msg.toLowerCase().startsWith("[xconomy]") && msg.toLowerCase().includes("you
             	bot.chat(`/msg ${sender} ${sender}, u heeft ${geoAmount} gestort op uw JPO account, u heeft nu ${geoTotaalFormatted} Geo op uw JPO account.`);
                 const discordUrl = `http://${config.discord_api_ip}:${config.discord_api_port}/send`;
                 const titleParam = "Transactie";
-                const textParam = `De JPO gebruiker **${name}** heeft **${geoAmmount} op zijn/haar account gestord en heeft nu totaal **${geoTotaalFormatted} op zijn/haar account.`;
+                const textParam = `De JPO gebruiker **${sender}** heeft **${geoAmount} op zijn/haar account gestord en heeft nu totaal **${geoTotaalFormatted} op zijn/haar account.`;
                 axios.get(discordUrl, { params: { titel: titleParam, tekst: textParam } })
           	}
         	});
