@@ -8,15 +8,67 @@ let closestPlayer = null;
 let closestDistance = Infinity;  
 let lastSneakState = false; 
 let isFreeze = false;
+let botInstance = null;
 let botStatus = {
   online: false
 };
 
 const app = express();
+app.use(express.json());
 const port = 3001;
 
 app.get('/status', (req, res) => {
   res.json(botStatus);
+});
+
+app.post('/claim', (req, res) => {
+  const { minecraftname, server, claimname, productname, locatie } = req.body;
+
+  if (!minecraftname || !server || !claimname || !productname || !locatie) {
+    return res.status(400).json({ error: 'Missing parameters' });
+  }
+
+  if (!botInstance || !botInstance.chat) {
+    return res.status(500).json({ error: 'Bot is not online.' });
+  }
+
+  botInstance.chat(`/msg ${minecraftname} ${minecraftname}, u heeft succesvol ${productname} gekocht.`);
+  
+  setTimeout(() => {
+    botInstance.chat(`/home ${locatie}`);
+
+    setTimeout(() => {
+      botInstance.chat(`/tpahere ${minecraftname}`);
+
+      setTimeout(() => {
+        botInstance.chat(`/rg addmember -w "${server}" ${claimname} ${minecraftname}`);
+      }, 1000);
+
+      const onMessage = (jsonMsg) => {
+        const msg = jsonMsg.toString();
+
+        if (
+          msg.includes(`${minecraftname} accepted your teleportation request.`) ||
+          msg.includes(`Teleportation request for ${minecraftname} expired.`)
+        ) {
+          setTimeout(() => {
+            botInstance.chat('/home');
+          }, 1000);
+
+          botInstance.off('message', onMessage);
+        }
+      };
+
+      botInstance.on('message', onMessage);
+
+    }, 1000);
+    
+  }, 1000);
+
+  res.json({ success: true });
+});
+
+app.listen(port, () => {
 });
 
 function createBot() {
@@ -29,11 +81,11 @@ function createBot() {
     checkTimeoutInterval: config.checkTimeoutInterval,
     version: config.version  
   });
+  
+  botInstance = bot;
 
   bot.on('spawn', () => {
-    botStatus = {
-      online: true
-    };
+    botStatus = { online: true };
   });
 
   bot.on('entityMoved', (entity) => {
@@ -43,9 +95,9 @@ function createBot() {
       const distance = bot.entity.position.distanceTo(entity.position);
       if (distance < 10) { 
         bot.lookAt(entity.position.offset(0, 1, 0), true); 
-  
+          
         const isSneaking = entity.metadata && entity.metadata[0] && (entity.metadata[0] & 0x02) !== 0;
-       const shouldSneak = Boolean(isSneaking);  
+        const shouldSneak = Boolean(isSneaking);  
   
         if (shouldSneak !== lastSneakState) {
           lastSneakState = shouldSneak;
