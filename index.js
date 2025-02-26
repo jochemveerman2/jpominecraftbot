@@ -110,15 +110,13 @@ function createBot() {
   });
   
   bot.on('entitySwingArm', (entity) => {
-      if (entity.type === 'player') {
-          console.log(`${entity.username} sloeg!`);
-  
-          if (entity !== bot.entity) {
-              bot.attack(entity);
-          }
+      if (isFreeze) return; 
+    
+      if (entity.type === 'player' && entity !== bot.entity) {
+          bot.attack(entity);
       }
   });
-
+  
   bot.on('error', (err) => {
     console.log('Er is een fout opgetreden:', err);
   });
